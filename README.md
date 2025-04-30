@@ -5,7 +5,7 @@ A simple desktop app to help you manage grocery items efficiently.
 ## 💻 Tech Stack
 - Python
 - Tkinter (GUI)
-- SQLite/MySQL (Database)
+- SQLite (Database)
 
 ## 🧩 Features
 - Add, edit, and delete grocery items
