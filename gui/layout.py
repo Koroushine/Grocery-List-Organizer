@@ -6,6 +6,8 @@ class GroceryApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Grocery List Organizer")
+        self.root.geometry("600x400")  # Set a bigger starting size
+        self.root.minsize(500, 300)    # Set a minimum window size
         self.conn = db_config.connect_db()
 
         self.item_var = tk.StringVar()
@@ -15,22 +17,41 @@ class GroceryApp:
         self.refresh_list()
 
     def build_widgets(self):
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+
         frame = ttk.Frame(self.root, padding=10)
-        frame.pack(fill=tk.BOTH, expand=True)
+        frame.grid(row=0, column=0, sticky="nsew")
 
-        ttk.Label(frame, text="Item:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Entry(frame, textvariable=self.item_var).grid(row=0, column=1, padx=5, pady=5)
+        for i in range(4):
+            frame.columnconfigure(i, weight=1)
+        frame.rowconfigure(3, weight=1)
 
-        ttk.Label(frame, text="Quantity:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Entry(frame, textvariable=self.quantity_var).grid(row=1, column=1, padx=5, pady=5)
+        # Item Label & Entry
+        ttk.Label(frame, text="Item:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        ttk.Entry(frame, textvariable=self.item_var, width=30).grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-        ttk.Button(frame, text="Add", command=self.add_item).grid(row=2, column=0, pady=5)
-        ttk.Button(frame, text="Remove", command=self.remove_item).grid(row=2, column=1, pady=5)
+        # Quantity Label & Entry
+        ttk.Label(frame, text="Quantity:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        ttk.Entry(frame, textvariable=self.quantity_var, width=30).grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
+        # Buttons
+        ttk.Button(frame, text="Add", command=self.add_item).grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+        ttk.Button(frame, text="Remove", command=self.remove_item).grid(row=1, column=2, padx=5, pady=5, sticky="ew")
+
+        # Treeview
         self.tree = ttk.Treeview(frame, columns=("Item", "Quantity"), show="headings")
         self.tree.heading("Item", text="Item")
         self.tree.heading("Quantity", text="Quantity")
-        self.tree.grid(row=3, column=0, columnspan=2, pady=10)
+        self.tree.column("Item", anchor="center", width=200)
+        self.tree.column("Quantity", anchor="center", width=100)
+
+        self.tree.grid(row=3, column=0, columnspan=4, sticky="nsew", padx=5, pady=10)
+
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscroll=scrollbar.set)
+        scrollbar.grid(row=3, column=4, sticky="ns")
 
     def add_item(self):
         item = self.item_var.get().strip()
@@ -57,4 +78,3 @@ class GroceryApp:
             self.tree.delete(i)
         for item, quantity in db_config.get_items(self.conn):
             self.tree.insert("", "end", values=(item, quantity))
-
